@@ -5,14 +5,12 @@ module ICMP4EM
     end
 
     def notify_readable
-      # PP.pp self
       data, host = @io.recvfrom(1500)
       icmp_data = data[20, data.length]
       
       begin
         @manager.handle_reply Packet.from_bytes(icmp_data)
       rescue ArgumentError
-        return
       end
     end
 

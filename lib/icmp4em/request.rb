@@ -26,7 +26,6 @@ module ICMP4EM
     end
 
     def send
-      puts "Sending to #{@host}, retry #{@retry_id}"
       @timeout_timer.cancel if @timeout_timer.is_a?(EventMachine::Timer)
 
       @timeout_timer = EventMachine::Timer.new(@timeout) do
