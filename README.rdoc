@@ -1,0 +1,64 @@
+= ICMP Library for EventMachine
+
+== Summary
+
+This gem allows you to send ICMP echo requests and handle ICMP echo replies.
+
+
+== Features
+
+Version 0.1.0 supports:
+
+* Sending and receiving ICMP echo requests / replies
+* A configurable timeout / retry count
+
+Future revisions of this library will support:
+
+* Ruby fibers
+* A separate proxy process that, running as root, can send ICMP packets on behalf of other non-root processes. This will be baked into the library to make it super easy for non-root processes to send ICMP requests.
+
+
+== Running tests
+
+Tests are coming in the next minor version release. Promise.
+
+
+== Acknowledgements
+
+* The previous library, https://github.com/jakedouglas/icmp4em
+* EventMachine[http://rubyeventmachine.com], by Francis Cianfrocca and Aman Gupta
+* All the helpful folks on the Freenode #eventmachine channel
+
+
+== Examples
+
+  EM.run {
+    manager = ICMP4EM::Manager.new
+  
+    request = m.ping "8.8.8.8"
+
+    request.callback do
+      puts "SUCCESS"
+    end
+
+    request.errback do |e|
+      puts "FAILURE, got error #{e}"
+    end
+  }
+
+== Configuration parameters
+
+The following parameters may be passed to the ICMP4EM::Manager constructor (to affect all pings) or as arguments following the IP address when pinging an individual host:
+
+* *timeout* - Number of seconds to wait for a response
+* *retries* - Number of retries before eventually failing
+
+== Change Log
+
+Version 0.1.0:
+
+* First import
+
+== Credits
+
+Author: Norman Elton  mailto:normelton@gmail.com

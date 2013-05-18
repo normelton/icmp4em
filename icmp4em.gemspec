@@ -4,13 +4,14 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'icmp4em/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "ICMP4EM"
-  gem.version       = ICMP4EM::VERSION
-  gem.authors       = ["Norman Elton"]
-  gem.email         = ["normelton@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.name             = "icmp4em"
+  gem.version          = ICMP4EM::VERSION
+  gem.authors          = ["Norman Elton"]
+  gem.email            = ["normelton@gmail.com"]
+  gem.description      = %q{A high-performance ICMP engine build on EventMachine}
+  gem.summary          = %q{A high-performance ICMP engine build on EventMachine}
+  gem.homepage         = ""
+  gem.extra_rdoc_files = ["README.rdoc"]
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
