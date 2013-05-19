@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+require "icmp4em"
+require "optparse"
+require "pp"
+
+options = {:bind_host => "127.0.0.1", :bind_port => 63312}
+
+OptionParser.new do |opts|
+  opts.on("-d", "--debug", "Debug mode") do |v|
+    $debug = true
+  end
+
+  opts.on("-h", "--host [HOST]", "Bind to a specific host") do |v|
+    options[:bind_host] = v
+  end
+
+  opts.on("-p", "--port [PORT]", "Bind to a specific port") do |v|
+    options[:bind_port] = v.to_i
+  end
+end.parse!
+
+EventMachine.run do
+  @pending_requests = {}
+  @icmp_socket = Socket.new(Socket::PF_INET, Socket::SOCK_RAW, Socket::IPPROTO_ICMP)
+
+  EventMachine.watch(@icmp_socket, ICMP4EM::Proxy::IcmpHandler, :pending_requests => @pending_requests) {|c| c.notify_readable = true}
+
+  @udp_socket = EventMachine::open_datagram_socket(options[:bind_host], options[:bind_port], ICMP4EM::Proxy::UdpHandler, :pending_requests => @pending_requests, :icmp_socket => @icmp_socket)
+end

@@ -21,11 +21,9 @@ module ICMP4EM
       @timeout = args[:timeout] || 1
       @retries = args[:retries] || 3
       @socket = Socket.new(Socket::PF_INET, Socket::SOCK_RAW, Socket::IPPROTO_ICMP)
-      @id = rand(MAX_IDENTIFIER)
+      @id = 16 #rand(MAX_IDENTIFIER)
       @pending_requests = {}
       @next_request_id = 0
-
-      # EventMachine.attach @socket, Handler
 
       EventMachine.watch(@socket, Handler, :manager => self) {|c| c.notify_readable = true}
     end
@@ -48,6 +46,8 @@ module ICMP4EM
         @pending_requests.delete request.id
       end
 
+      request.send
+      
       request
     end
 

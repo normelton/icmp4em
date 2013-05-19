@@ -21,8 +21,6 @@ module ICMP4EM
       errback do
         @timeout_timer.cancel
       end      
-
-      send
     end
 
     def send

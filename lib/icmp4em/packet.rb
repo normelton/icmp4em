@@ -61,7 +61,19 @@ module ICMP4EM
     end
 
     def to_bytes
-      [@type, @code, compute_checksum, @manager_id, compute_sequence, @payload].pack("C2 n3 A*")
+      [@type, @code, compute_checksum, @manager_id, sequence, @payload].pack("C2 n3 A*")
+    end
+
+    def sequence
+      (@request_id << 4) + @retry_id
+    end
+
+    def key
+      [@manager_id, sequence].pack("n2")
+    end
+
+    def key_string
+      key.unpack("H*").first
     end
 
     private
@@ -71,12 +83,8 @@ module ICMP4EM
     # This method was stolen directly from the old icmp4em - normelton
     # ... which was stolen directly from net-ping - yaki
 
-    def compute_sequence
-      (@request_id << 4) + @retry_id
-    end      
-
     def compute_checksum
-      msg = [@type, @code, 0, @manager_id, compute_sequence, @payload].pack("C2 n3 A*")
+      msg = [@type, @code, 0, @manager_id, sequence, @payload].pack("C2 n3 A*")
 
       length    = msg.length
       num_short = length / 2
