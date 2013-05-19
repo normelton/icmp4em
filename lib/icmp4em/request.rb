@@ -35,14 +35,8 @@ module ICMP4EM
         end
       end
 
-      begin
-        sock_addr = Socket.pack_sockaddr_in(0, @host)
-        packet = Packet.new(:type => Packet::ICMP_ECHO_REQUEST, :manager_id => @manager.id, :request_id => @id, :retry_id => @retry_id)
-        @manager.socket.send packet.to_bytes, 0, sock_addr
-      rescue
-        puts "Got exception #{$!}"
-        fail $!
-      end
+      packet = Packet.new(:type => Packet::ICMP_ECHO_REQUEST, :manager_id => @manager.id, :request_id => @id, :retry_id => @retry_id)
+      @manager.send_packet :packet => packet, :to => @host
     end
   end
 end

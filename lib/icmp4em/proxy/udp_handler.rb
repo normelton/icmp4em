@@ -18,9 +18,14 @@ module ICMP4EM
         log "Received incoming request from #{source_ip}:#{source_port}"
 
         begin
-          request = Request.new :source_ip => source_ip, :source_port => source_port, :data => data
+          request = Request.from_bytes :source_ip => source_ip, :source_port => source_port, :data => data
         rescue ArgumentError
           log "  Received error - #{$!}"
+          return
+        end
+
+        unless request.packet.is_request?
+          log "  Incoming packet is not an ICMP request"
           return
         end
 
@@ -37,7 +42,7 @@ module ICMP4EM
         request.timeout(30)
 
         request.callback do |packet|
-          log "Got reply for request #{request.key_string}"
+          log "  Got reply for request #{request.key_string}"
           log "  Sending reply back to #{source_ip}:#{source_port}"
           send_datagram packet.to_bytes, source_ip, source_port
           @pending_requests.delete request.key

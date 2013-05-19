@@ -3,23 +3,30 @@ module ICMP4EM
     class Request
       include EM::Deferrable
 
-      attr_reader :source_ip
-      attr_reader :source_port
-      attr_reader :dest_ip
-      attr_reader :packet
+      attr_accessor :source_ip
+      attr_accessor :source_port
+      attr_accessor :dest_ip
+      attr_accessor :packet
+
+      def self.from_bytes args = {}
+        request = Request.new
+
+        data = args[:data]
+        address_length = data.unpack("n").first
+
+        request.source_ip = args[:source_ip]
+        request.source_port = args[:source_port]
+        request.dest_ip = data[2,address_length]
+        request.packet = Packet.from_bytes data[address_length + 2, data.length]
+
+        request
+      end
 
       def initialize args = {}
-        data = args[:data]
+      end
 
-        @source_ip = args[:source_ip]
-        @source_port = args[:source_port]
-
-        address_length = data.unpack("n").first
-        @dest_ip = data[2,address_length]
-
-        @packet = Packet.from_bytes data[address_length + 2, data.length]
-
-        raise ArgumentError, "Did not receive an ICMP request" unless @packet.is_request?
+      def to_bytes
+        [@dest_ip.length].pack("n") + @dest_ip + @packet.to_bytes
       end
 
       def key

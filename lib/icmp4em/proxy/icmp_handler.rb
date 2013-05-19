@@ -13,7 +13,7 @@ module ICMP4EM
         data, host = @io.recvfrom(1500)
         icmp_data = data[20, data.length]
         
-        log "Received ICMP response from #{host}"
+        log "Received ICMP response from #{host.ip_address}"
 
         begin
           packet = Packet.from_bytes(icmp_data)

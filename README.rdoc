@@ -7,20 +7,57 @@ This gem allows you to send ICMP echo requests and handle ICMP echo replies.
 
 == Features
 
-Version 0.1.0 supports:
+Version 0.2.0 supports:
 
 * Sending and receiving ICMP echo requests / replies
 * A configurable timeout / retry count
+* A separate proxy process that, running as root, can send ICMP packets on behalf of other non-root processes. See below.
 
 Future revisions of this library will support:
 
 * Ruby fibers
-* A separate proxy process that, running as root, can send ICMP packets on behalf of other non-root processes. This will be baked into the library to make it super easy for non-root processes to send ICMP requests.
+
+
+== Simple Example
+
+  EM.run {
+    manager = ICMP4EM::Manager.new
+  
+    request = m.ping "8.8.8.8"
+
+    request.callback { puts "SUCCESS" }
+    request.errback { |e| puts "FAILURE, got error #{e}" }
+  }
+
+
+== ICMP Proxy
+
+Typically, sending ICMP packets requires a process to have root privileges. This is often less than ideal. Work arounds are also less than wonderful, often involving sending a TCP or UDP packet in the hopes of receiving a response.
+
+This library supports the notion of an ICMP proxy via the included +icmp-proxy+ script. Running as root, it accepts UDP requests from non-root processes to handle the sending of ICMP packets.
+
+With the +icmp-proxy+ running on the local host, it's trivial to configure:
+
+  manager = ICMP4EM::Manager.new(:proxy => true)
+
+*Note* - The +icmp-proxy+ must run as root, and accepts incoming connections. By default, it binds to the localhost and will not accept connections from other hosts. This is configurable (run the proxy with +--help+ to see options). While it is possible to accept requests from other hosts, any root-owned process accepting packets from the Internet is an inherent security risk. Help improve the proxy by familiarizing yourself with its code before trusting it to the Internet.
 
 
 == Running tests
 
-Tests are coming in the next minor version release. Promise.
+A simple rspec test is included.
+
+
+== Configuration parameters
+
+The following parameters may be passed to the ICMP4EM::Manager constructor (to affect all pings) or as arguments following the IP address when pinging an individual host:
+
+* *timeout* - Number of seconds to wait for a response
+* *retries* - Number of retries before eventually failing
+
+The following parameter may be passed to the ICMP4EM::Manager constructor to enable use of the ICMP proxy (see above):
+
+* *proxy* - Set to +true+ to use a proxy on the localhost, or +host:port+ to use a proxy on another host.
 
 
 == Acknowledgements
@@ -30,30 +67,11 @@ Tests are coming in the next minor version release. Promise.
 * All the helpful folks on the Freenode #eventmachine channel
 
 
-== Examples
-
-  EM.run {
-    manager = ICMP4EM::Manager.new
-  
-    request = m.ping "8.8.8.8"
-
-    request.callback do
-      puts "SUCCESS"
-    end
-
-    request.errback do |e|
-      puts "FAILURE, got error #{e}"
-    end
-  }
-
-== Configuration parameters
-
-The following parameters may be passed to the ICMP4EM::Manager constructor (to affect all pings) or as arguments following the IP address when pinging an individual host:
-
-* *timeout* - Number of seconds to wait for a response
-* *retries* - Number of retries before eventually failing
-
 == Change Log
+
+Version 0.2.0:
+
+* ICMP proxy support
 
 Version 0.1.0:
 

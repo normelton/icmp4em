@@ -20,12 +20,30 @@ module ICMP4EM
     def initialize args = {}
       @timeout = args[:timeout] || 1
       @retries = args[:retries] || 3
-      @socket = Socket.new(Socket::PF_INET, Socket::SOCK_RAW, Socket::IPPROTO_ICMP)
-      @id = 16 #rand(MAX_IDENTIFIER)
+      @id = rand(MAX_IDENTIFIER)
       @pending_requests = {}
       @next_request_id = 0
 
-      EventMachine.watch(@socket, Handler, :manager => self) {|c| c.notify_readable = true}
+      if args[:proxy]
+        if args[:proxy].is_a?(String)
+          proxy_host = args[:proxy].split(":")[0]
+          proxy_port = args[:proxy].split(":")[1] || 63312
+          @proxy_addr = Socket.pack_sockaddr_in(proxy_port, proxy_host)
+        else
+          @proxy_addr = Socket.pack_sockaddr_in(63312, "127.0.0.1")
+        end
+
+        @socket = Socket.new(Socket::PF_INET, Socket::SOCK_DGRAM)
+        EventMachine.watch(@socket, UdpHandler, :manager => self) {|c| c.notify_readable = true}
+
+      else
+        @socket = Socket.new(Socket::PF_INET, Socket::SOCK_RAW, Socket::IPPROTO_ICMP)
+        EventMachine.watch(@socket, IcmpHandler, :manager => self) {|c| c.notify_readable = true}
+      end
+    end
+
+    def proxy_enabled?
+      @proxy_addr
     end
 
     def ping host, args = {}
@@ -59,6 +77,26 @@ module ICMP4EM
       return if request.nil?
 
       request.succeed
+    end
+
+    def send_packet args = {}
+      begin
+        if proxy_enabled?
+          proxy_request = ICMP4EM::Proxy::Request.new
+          proxy_request.dest_ip = args[:to]
+          proxy_request.packet = args[:packet]
+
+          @socket.send proxy_request.to_bytes, 0, @proxy_addr
+
+        else
+          sock_addr = Socket.pack_sockaddr_in(0, args[:to])
+          @socket.send args[:packet].to_bytes, 0, sock_addr
+        end
+      rescue
+        puts "Got exception #{$!}"
+        fail $!
+      end
+
     end
   end
 end
