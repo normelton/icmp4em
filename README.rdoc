@@ -23,7 +23,7 @@ Future revisions of this library will support:
   EM.run {
     manager = ICMP4EM::Manager.new
   
-    request = m.ping "8.8.8.8"
+    request = manager.ping "8.8.8.8"
 
     request.callback { puts "SUCCESS" }
     request.errback { |e| puts "FAILURE, got error #{e}" }
