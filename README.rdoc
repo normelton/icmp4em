@@ -4,6 +4,7 @@
 
 This gem allows you to send ICMP echo requests and handle ICMP echo replies.
 
+*Note* - This library was inspired by https://github.com/jakedouglas/icmp4em, and the gem shares the same name. While most of the functionality was copied forward, the two libraries are not 100% compatible. If upgrading from the old (0.0.2) to the new (1.0.0+), be sure to read the documentation and test thoroughly.
 
 == Features
 
