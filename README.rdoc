@@ -57,7 +57,7 @@ The following parameters may be passed to the ICMP4EM::Manager constructor (to a
 
 The following parameter may be passed to the ICMP4EM::Manager constructor to enable use of the ICMP proxy (see above):
 
-* *proxy* - Set to +true+ to use a proxy on the localhost, or +host:port+ to use a proxy on another host.
+* *proxy* - Set to <tt>true</tt> to use a proxy on the localhost, or <tt>host:port</tt> to use a proxy on another host.
 
 
 == Acknowledgements
